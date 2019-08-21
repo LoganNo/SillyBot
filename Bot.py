@@ -26,4 +26,4 @@ async def reload(ctx, extension):
 	client.load_extension(f'cogs.{extension}')
 	await ctx.send(f'{extension} reloaded')
 
-client.run('NjEzMzg1OTQ3ODg2OTExNTEy.XVwNFg.2KOcgET6lfsZ2lRliBWoAdDJLBc')
+client.run('redacted')
