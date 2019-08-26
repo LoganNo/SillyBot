@@ -5,6 +5,7 @@ from discord.utils import get
 import youtube_dl
 import os
 import time
+from collections import Counter
 from mutagen.mp3 import MP3
 players = {}
 
@@ -20,11 +21,46 @@ class VC(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author == self.client.user:
-            return
-        if 'VC' in message.content:
+        if 'Clear' in message.content:
+            self.client.cached_messages.clear()
+            await channel.send("cleared")
+    #clear cache?
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if 'Give' in message.content:
+            if message.author == self.client.user:
+                return
             channel = message.channel
-            await channel.send('Ofcourse you want to VC')
+            messages = self.client.cached_messages
+            length = 0
+            usernames = {'Dummy':Counter(n=0)}
+            #await channel.send(type(usernames))
+            #await channel.send(type(usernames['Dummt']))
+
+            if(len(messages) < 10):
+                length = len(messages)
+            else:
+                length = 10
+            #go from back to front!
+            length_of_list = len(messages)-1
+            for x in range(length):
+                author = messages[length_of_list-x].author
+                #if a new user is met, make a dict entry for them
+                if author not in usernames:
+                    usernames[author] = Counter()
+
+                #split the sentence into words
+                sentence = messages[length_of_list-x].content.split()
+                for y in range(len(sentence)):
+                    word = sentence[y]
+                    #if the author
+                    if word in usernames[author]:
+                        usernames[author][word]  +=1
+                        await channel.send(f' Message: {word}, Author: {author}, Count {usernames[author][word]}')
+                    else:
+                        usernames[author][word] = 1
+                        await channel.send(f' Message: {word}, Author: {author}, Count {usernames[author][word]}')
+
 
     #commands
     @commands.command(pass_context=True)
@@ -56,14 +92,6 @@ class VC(commands.Cog):
         else:
             print("Bot was told to leave voice channel, but was not in one")
             await ctx.send("Don't think I am in a voice channel")
-
-    @commands.command()
-    async def test(self, ctx, channel: discord.VoiceChannel):
-        vc_members = channel.members
-        for x in range(len(vc_members)):
-            await ctx.send(vc_members[x])
-        return
-
 
     @commands.command(pass_context = True)
     async def annoy(self, ctx):
